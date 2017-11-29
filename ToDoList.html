@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<script src="vue.js"></script>
+</head>
+<style>
+	*{
+		padding:0;
+		margin:0;
+		list-style: none;
+	}
+	body{
+		background: #CDCDCD;
+	}
+	header{
+		width: 100%;
+		height:50px;
+		background: #323232;
+	}
+	header>span{
+		float: left;
+		width: 100px;
+		line-height: 50px;
+		color: #DDD;
+		font-size: 24px;
+		cursor: pointer;
+		font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+		margin-left: 28%;
+	}
+	header>input{
+		float: left;
+		width: 27%;
+		height: 26px;
+		margin-top: 12px;
+		margin-left: 130px;
+		text-indent: 10px;
+		border-radius: 5px;
+		box-shadow: 0 1px 0 rgba(255,255,255,0.24), 0 1px 6px rgba(0,0,0,0.45) inset;
+		border: none;
+	}
+	header>input:focus{
+		outline: none;
+	}
+	section{
+		width: 600px;
+		margin:0 auto;
+	}
+	h2{
+		position:relative;
+		margin-top: 20px;
+		margin-bottom: 20px;
+	}
+	h2>span{
+		position:absolute;
+		top:2px;
+		right:5px;
+		display:inline-block;
+		padding:0 5px;
+		height:20px;
+		border-radius:20px;
+		background:#E6E6FA;
+		line-height:22px;
+		text-align:center;
+		color:#666;
+		font-size:14px;
+	}
+	ol,ul{
+		padding:0;
+		list-style:none;
+	}
+	li input{
+		position:absolute;
+		top:2px;
+		left:10px;
+		width:22px;
+		height:22px;
+		cursor:pointer;
+	}
+	li input[type='text']{
+		width: auto;
+		height: 22px;
+		position: absolute;
+		top: 2px;
+		left: 50px;
+	}
+	p{
+		margin: 0;
+	}
+	li p input{
+		top:3px;
+		left:40px;
+		width:70%;
+		height:20px;
+		line-height:14px;
+		text-indent:5px;
+		font-size:14px;
+	}
+	ol>li{
+		border-left: 5px solid #629A9C;
+	}
+	ul>li{
+		border-left: 5px solid #999;
+		opacity: 0.5;
+	}
+	li{
+		height:32px;
+		line-height:32px;
+		background: #fff;
+		position:relative;
+		margin-bottom: 10px;
+		padding:0 45px;
+		border-radius:3px;
+		box-shadow: 0 1px 2px rgba(0,0,0,0.07);
+	}
+	ol li>input,ul>li>input{
+		padding-left: 10px;
+		border: none;
+		margin-top: 3px;
+	}
+
+	li a{
+		position:absolute;
+		top:4px;
+		right:4px;
+		display:inline-block;
+		width:14px;
+		height:12px;
+		border-radius:14px;
+		border:6px double #FFF;
+		background:#CCC;
+		line-height:14px;
+		text-align:center;
+		color:#FFF;
+		font-weight:bold;
+		font-size:14px;
+		cursor:pointer;
+	}
+</style>
+<body>
+<div id="app">
+	<header>
+		<span>ToDoList</span>
+		<input type="text" placeholder="添加ToDo" @keydown.enter="add" v-model="msg">
+	</header>
+	<section>
+		<h2>正在进行 <span id="todocount">{{filter.doing.length}}</span></h2>
+		<ol id="todolist" class="demo-box">
+			<li v-for="v in filter.doing">
+				<input type="checkbox" v-model="v.status">
+				<input type="text" v-model="v.content">
+				<a @click="del(v.id)">-</a>
+			</li>
+		</ol>
+		<h2>已经完成 <span id="donecount">{{filter.done.length}}</span></h2>
+		<ul id="donelist">
+			<li v-for="v in filter.done">
+				<input type="checkbox" v-model="v.status">
+				<input type="text" v-model="v.content">
+				<a @click="del(v.id)">-</a>
+			</li>
+		</ul>
+	</section>
+</div>
+</body>
+</html>
+<script>
+
+	/*let arr = [
+        {id:1,content:'戴着墨镜',status:true},
+        {id:2,content:'开着车',status:false},
+        {id:3,content:'回村',status:false},
+        {id:4,content:'睡懒觉',status:false},
+        {id:5,content:'吃大餐',status:true},
+        {id:6,content:'买东西',status:true}
+	]
+	localStorage.todos = JSON.stringify(arr);*/
+    let app = new Vue({
+        el:"#app",
+        data:{
+            todos:[],
+            lastid:0,
+			msg:''
+        },
+        computed:{
+            filter(){
+                let data = {doing:[],done:[]};
+                data.done = this.todos.filter(ele=>ele.status);
+                data.doing = this.todos.filter(ele=>!ele.status);
+                return data;
+            }
+        },
+        methods:{
+            save(){
+                localStorage.todos = JSON.stringify(this.todos);
+            },
+            del(ids){
+                this.todos = this.todos.filter(ele=>ele.id!=ids);
+            },
+            add(e){
+                if(this.msg.trim() == ''){
+                    return;
+				}
+                this.todos.push({id:++this.lastid,content:this.msg,status:false});
+                this.msg = '';
+            }
+        },
+        mounted:function(){
+            this.todos = JSON.parse(localStorage.todos);
+            this.lastid = this.todos[this.todos.length-1].id;
+        }
+    })
+    app.$watch('todos',function(v,oldv){
+        localStorage.todos = JSON.stringify(this.todos)
+    },{deep:true})
+</script>
